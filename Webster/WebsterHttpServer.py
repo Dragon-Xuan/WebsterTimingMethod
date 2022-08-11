@@ -5,14 +5,14 @@
 @Date:2022/8/8 11:08
 '''
 import json
-import requests
 import tornado.web
 import tornado.httpserver
 import tornado.ioloop
 # options模块用于全局参数定义，存储，转换，从而不用将参数写死在程序中
 import tornado.options
 
-
+# 定义端口
+tornado.options.define("port",default = 9999,type=int)
 
 
 class WebSterTimingMethod():
@@ -25,6 +25,8 @@ class WebSterTimingMethod():
     L:各相的损失时间列表
     A:黄灯时间（默认3秒）
     R:全红时间（默认0秒）
+    MaxC:周期最长时间（默认180s）
+    MinC:周期最短时间（默认30s）
     '''
     def __init__(self):
         self.ID = 0
@@ -37,8 +39,10 @@ class WebSterTimingMethod():
         self.C = 0
         self.TY = 0
         self.TL = 0
+        self.MaxC = 180
+        self.MinC = 30
 
-    def __updateparam(self,ID,N,Q,S,L,A=3,R=0):
+    def __updateparam(self,ID,N,Q,S,L,A=3,R=0,MaxC = 180,MinC=30):
         self.Id = ID
         self.N = N
         self.Q = Q
@@ -46,6 +50,8 @@ class WebSterTimingMethod():
         self.L = L
         self.A = A
         self.R = R
+        self.MinC = MinC
+        self.MaxC = MaxC
 
 
     #计算总损失时间
@@ -64,7 +70,11 @@ class WebSterTimingMethod():
         for i in range(0,len(self.Q)):
             q = self.Q[i]
             s = self.S[i]
-            y = q/s/self.N
+            try:
+                y = q/s/self.N
+            except ZeroDivisionError:
+                print("Error input caused ZeroDivisionError!")
+                y = 0
             self.y.append(y)
             total_y += y
         self.TY = total_y
@@ -77,20 +87,27 @@ class WebSterTimingMethod():
         try:
             C = int((1.5*L+5)/(1-Y))
         except ZeroDivisionError:
+            print("Error input caused ZeroDivisionError!")
             C=0
-            print("you can't divide by zero!")
+        if C<self.MinC:
+            C = self.MinC
+        if C > self.MaxC:
+            C = self.MaxC
         self.C = C
         return C
 
 
     # 处理三相信号时间融合
-    def TimeFusion(self,G,Y,R):
+    def Judge_Method(self,):
         pass
 
-    def TimingMethod(self,ID,N,Q,S,L,A=3,R=0):
-        self.__updateparam(ID,N,Q,S,L,A,R)
+    def TimingMethod(self,ID,N,Q,S,L,A=3,R=0,MaxC = 180,MinC=30):
+        self.__updateparam(ID,N,Q,S,L,A,R,MaxC,MinC)
         if not (N == len(Q) == len(S) == len(L)):
-            return -1
+            Id_Method_Map={}
+            Id_Method_Map["junctionId"] = ID
+            Id_Method_Map["duration"] = []
+            return Id_Method_Map
         C = self.__calc_C()
         # 计算有效绿灯时间
         Ge = C - self.TL
@@ -99,75 +116,42 @@ class WebSterTimingMethod():
         Id_Method_Map = {}
         for i in range(0,N):
             Mi = []
-            Gi =int(Ge*(self.y[i]/self.TY) - A + L[i])
-            Mi.append(Gi)
-            Mi.append(A)
-            Mi.append(C-Gi-A)
-            Method.append(Mi)
-            Id_Method_Map["junctionId"] = ID
-            Id_Method_Map["duration"] = Method
+            try:
+                Gi =int(Ge*(self.y[i]/self.TY) - A + L[i])
+                Mi.append(Gi)
+                Mi.append(A)
+                Mi.append(C - Gi - A)
+                Method.append(Mi)
+            except ZeroDivisionError:
+                print("Error input caused ZeroDivisionError!")
+
+        Id_Method_Map["junctionId"] = ID
+        Id_Method_Map["duration"] = Method
         return Id_Method_Map
 
-
-
-
-
-
-
-
-
-
-# 定义端口
-tornado.options.define("port",default=9999,type=int)
-
-
-
-
 class WebsterTimingServer(tornado.web.RequestHandler):
-    # def get(self):
-    #     # 获取数据
-    #     data_list = json.loads(self.request.body)
-    #     print(data_list)
-    #     print(str(type(data_list)))
-    #     # 处理数据
-    #     WTM = WebSterTimingMethod()
-    #     Methods = []
-    #     for dict_data in data_list:
-    #         print(dict_data["junctionId"])
-    #         Method = WTM.TimingMethod(ID=dict_data["junctionId"],
-    #                                   N=dict_data["phaseNum"],
-    #                                   Q=dict_data["trafficFlowList"],
-    #                                   S=dict_data["saturatedTrafficList"],
-    #                                   L=dict_data["wastedTime"],
-    #                                   A=dict_data["yellowTime"],
-    #                                   R=dict_data["allRedTime"], )
-    #         Methods.append(Method)
-    #         # 返回数据
-    #     print(Methods)
-    #     self.write(json.dumps(Methods))
-    #     print("ok")
 
     def post(self):
 
         # 获取数据
         data_list = json.loads(self.request.body)
-        # print(data_list)
-        # print(str(type(data_list)))
         # 处理数据
         WTM = WebSterTimingMethod()
         Methods = []
         for dict_data in data_list:
-            # print(dict_data["junctionId"])
             Method = WTM.TimingMethod(ID=dict_data["junctionId"],
                                       N= dict_data["phaseNum"],
                                       Q= dict_data["trafficFlowList"],
                                       S= dict_data["saturatedTrafficList"],
                                       L= dict_data["wastedTime"],
                                       A= dict_data["yellowTime"],
-                                      R= dict_data["allRedTime"],)
+                                      R= dict_data["allRedTime"],
+                                      MaxC=dict_data["maxDurationTime"],
+                                      MinC=dict_data["minDurationTime"]
+                                      )
             Methods.append(Method)
             # 返回数据
-        # print(Methods)
+        print(Methods)
         self.write(json.dumps(Methods))
         print("ok")
 
@@ -178,8 +162,7 @@ if __name__ == "__main__":
 
     app = tornado.web.Application(handlers=[(r"/WebsterTiming",WebsterTimingServer)],autoreload=True)
     httpserver = tornado.httpserver.HTTPServer(app)
-    print("prot: ")
-    print(tornado.options.options.port)
+    print("port: " + str(tornado.options.options.port))
     httpserver.listen(tornado.options.options.port)
     tornado.ioloop.IOLoop.current().start()
 

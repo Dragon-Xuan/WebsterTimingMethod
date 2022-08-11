@@ -18,6 +18,8 @@ if __name__ == "__main__":
         "junctionId":"M10001",
         "allRedTime":0,
         "yellowTime":3,
+        "maxDurationTime":100,
+        "minDurationTime":40,
         "saturatedTrafficList":[
             1534,
             1534,
@@ -33,6 +35,8 @@ if __name__ == "__main__":
         "phaseNum":4
     },
     {
+        "maxDurationTime": 100,
+        "minDurationTime": 40,
         "trafficFlowList":[
             1225,
             691,
@@ -57,6 +61,8 @@ if __name__ == "__main__":
         "phaseNum":4
     },
     {
+        "maxDurationTime": 100,
+        "minDurationTime": 40,
         "trafficFlowList":[
             1406,
             515,
@@ -81,6 +87,8 @@ if __name__ == "__main__":
         "phaseNum":4
     },
     {
+        "maxDurationTime": 100,
+        "minDurationTime": 40,
         "trafficFlowList":[
             1429,
             575,
@@ -105,6 +113,8 @@ if __name__ == "__main__":
         "phaseNum":4
     },
     {
+        "maxDurationTime": 100,
+        "minDurationTime": 40,
         "trafficFlowList":[
             1479,
             678,
@@ -129,8 +139,10 @@ if __name__ == "__main__":
         "phaseNum":4
     },
     {
+        "maxDurationTime": 100,
+        "minDurationTime": 40,
         "trafficFlowList":[
-            1363,
+
             743,
             1365,
             785
@@ -153,6 +165,8 @@ if __name__ == "__main__":
         "phaseNum":4
     },
     {
+        "maxDurationTime": 100,
+        "minDurationTime": 40,
         "trafficFlowList":[
             1303,
             745,
@@ -177,6 +191,8 @@ if __name__ == "__main__":
         "phaseNum":4
     },
     {
+        "maxDurationTime": 100,
+        "minDurationTime": 40,
         "trafficFlowList":[
             1465,
             669,
@@ -201,6 +217,8 @@ if __name__ == "__main__":
         "phaseNum":4
     },
     {
+        "maxDurationTime": 100,
+        "minDurationTime": 40,
         "trafficFlowList":[
             1401,
             598,
@@ -225,6 +243,8 @@ if __name__ == "__main__":
         "phaseNum":4
     },
     {
+        "maxDurationTime": 100,
+        "minDurationTime": 40,
         "trafficFlowList":[
             1452,
             560,
@@ -235,10 +255,10 @@ if __name__ == "__main__":
         "allRedTime":0,
         "yellowTime":3,
         "saturatedTrafficList":[
-            1672,
-            1672,
-            1672,
-            1672
+            0,
+            0,
+            0,
+            0
         ],
         "wastedTime":[
             2.7,
