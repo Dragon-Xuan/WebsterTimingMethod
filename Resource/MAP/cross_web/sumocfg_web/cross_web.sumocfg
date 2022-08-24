@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- generated on 2022-08-17 11:29:35 by Eclipse SUMO GUI Version 1.14.1
+-->
+
+<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/sumoConfiguration.xsd">
+
+    <input>
+        <net-file value="../cross.net.xml"/>
+        <route-files value="../cross.rou.xml"/>
+        <junction-taz value="true"/>
+        <additional-files value="E1.add.xml,E2.add.xml"/>
+    </input>
+
+</configuration>
